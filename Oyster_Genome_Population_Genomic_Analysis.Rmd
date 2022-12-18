@@ -10,12 +10,12 @@ output: github_document
 
 Clone Repo
 ```{bash eval = FALSE}
-git clone https://github.com/The-Eastern-Oyster-Genome-Project/2021_Genome_Submissions.git
+git clone https://github.com/The-Eastern-Oyster-Genome-Project/2022_Eastern_Oyster_Population_Genomics.git
 ```
 
 Change into repo directory
 ```{bash eval = FALSE}
-cd 2021_Genome_Submissions
+cd 2022_Eastern_Oyster_Population_Genomics
 mkdir -p Masked
 mkdir -p Population_Genomics
 cd Masked
@@ -1370,7 +1370,7 @@ md4.pi <- ggplot(dfm4.pi, aes(x= index, y=marker, colour = as.factor(chrom_alt),
 
 
 
-png(filename=paste(prefix.OF,"Figure.2.pi_comparison.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S4.pi_comparison.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 
 layout <- "
 AAADD
@@ -1603,7 +1603,7 @@ md4 <- ggplot(dfm, aes(x= index, y=marker, colour = as.factor(chrom_alt),size=(0
   scale_color_manual(values=c("#7d5700", "#634500"))
 
 
-png(filename=paste(prefix.OFS,"Figure.S5.TajimasD.Comparison.W.S.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S6.TajimasD.Comparison.W.S.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "
 AAAD
 BBBD
@@ -1949,7 +1949,7 @@ md4 <- ggplot(dfm, aes(x= index, y=marker, colour = as.factor(chrom_alt),size=(0
 
 
 
-png(filename=paste(prefix.OFS,"Figure.S4.Heterozygosity.Comparison.W.S.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S5.Heterozygosity.Comparison.W.S.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "
 AAADD
 BBBDD
@@ -1959,6 +1959,321 @@ CCCFF
 m2+m3+md4+bd+bc+bc.ae +plot_layout(design=layout, guides = "collect") + plot_annotation(tag_levels = 'A')
 dev.off()
 ```
+
+## FIS
+
+```{bash}
+bedtools makewindows -g ./other_files/genome.file -w 10000 | mawk '!/NC_007175.2/' > ./other_files/10kb.bed
+AWK1='{print $1 "\t" $2-1 "\t" $2 "\t" $3 "\t" $4}'
+ls ./Population_Genomics/Intermediate_Files/*.MASKED.popstats | sed 's/.MASKED.popstats//g' | sed 's:\./Population_Genomics/Intermediate_Files/::g' | parallel "cut -f1,2,4,9 ./Population_Genomics/Intermediate_Files/{}.MASKED.popstats | mawk '$AWK1' > ./Population_Genomics/Intermediate_Files/{}.fis.bed"
+
+ls ./Population_Genomics/Intermediate_Files/*.fis.bed | sed 's/.fis.bed//g'  |sed 's:\./Population_Genomics/Intermediate_Files/::g' | parallel "bedtools intersect -a ./Population_Genomics/Intermediate_Files/{}.fis.bed -b ./Population_Genomics/SNP.MASKED.AE.TRSdp5g75.nDNA.g1.maf05.max2alleles.bed > ./Population_Genomics/Intermediate_Files/{}.fis.ae.bed"
+
+ls ./Population_Genomics/Intermediate_Files/*.fis.bed | sed 's/.fis.bed//g'  |sed 's:\./Population_Genomics/Intermediate_Files/::g' | parallel "bedtools intersect -b ./Population_Genomics/Intermediate_Files/{}.fis.bed -a ./other_files/10kb.bed -wa -wb | bedtools merge -d -1 -c 7,8 -o mean > ./Population_Genomics/Intermediate_Files/{}.fis.per10kb.bed"
+
+ls ./Population_Genomics/Intermediate_Files/*.fis.ae.bed | sed 's/.fis.ae.bed//g'  |sed 's:\./Population_Genomics/Intermediate_Files/::g' | parallel "bedtools intersect -b ./Population_Genomics/Intermediate_Files/{}.fis.ae.bed -a ./other_files/10kb.bed -wa -wb | bedtools merge -d -1 -c 7,8 -o mean > ./Population_Genomics/Intermediate_Files/{}.fis.ae.per10kb.bed"
+
+cd ./Population_Genomics/Intermediate_Files/
+
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tN_SITES\tN_SNPs\tFIS\tPOP\tGROUP") <(mawk '{if (NR>1)print $0 "\tCL\tWILD"}' CL.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tCLP\tWILD"}' CLP.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tCS\tWILD"}' CS.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC\tWILD"}' HC.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC-VA\tWILD"}' HC-VA.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHI\tWILD"}' HI.fis.per10kb.bed)  <(mawk '{if (NR>1)print $0 "\tSL\tWILD"}' SL.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tSM\tWILD"}' SM.fis.per10kb.bed)  > pop.wild.windowed.fis
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tN_SITES\tN_SNPs\tFIS\tPOP\tGROUP")  <(mawk '{if (NR>1)print $0 "\tCLP\tWILD"}' CLP.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tCS\tWILD"}' CS.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC\tWILD"}' HC.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC-VA\tWILD"}' HC-VA.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHI\tWILD"}' HI.fis.ae.per10kb.bed)   <(mawk '{if (NR>1)print $0 "\tSM\tWILD"}' SM.fis.ae.per10kb.bed)  > pop.wild.windowed.ae.fis
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tN_SITES\tN_SNPs\tFIS\tPOP\tGROUP")  <(mawk '{if (NR>1)print $0 "\tDEBY\tSELECTED"}' DEBY.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tLOLA\tSELECTED"}' LOLA.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tNEH\tSELECTED"}' NEH.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tOBOYS\tSELECTED"}' OBOYS.fis.per10kb.bed)  <(mawk '{if (NR>1)print $0 "\tUMFS\tSELECTED"}' UMFS.fis.per10kb.bed) > pop.selected.windowed.fis
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tN_SITES\tN_SNPs\tFIS\tPOP\tGROUP")  <(mawk '{if (NR>1)print $0 "\tNEH\tSELECTED"}' NEH.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tUMFS\tSELECTED"}' UMFS.fis.ae.per10kb.bed) > pop.selected.windowed.ae.fis
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tPOP\tGROUP") <(mawk '{if (NR>1)print $0 "\tCL\tWILD"}' CL.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tCLP\tWILD"}' CLP.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tCS\tWILD"}' CS.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tDEBY\tSELECTED"}' DEBY.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC\tWILD"}' HC.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC-VA\tWILD"}' HC-VA.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHI\tWILD"}' HI.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tLOLA\tSELECTED"}' LOLA.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tNEH\tSELECTED"}' NEH.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tOBOYS\tSELECTED"}' OBOYS.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tSL\tWILD"}' SL.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tSM\tWILD"}' SM.fis.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tUMFS\tSELECTED"}' UMFS.fis.per10kb.bed) > ../pop.windowed.fis
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tPOP\tGROUP") <(mawk '{if (NR>1)print $0 "\tCLP\tWILD"}' CLP.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tCS\tWILD"}' CS.fis.ae.per10kb.bed)  <(mawk '{if (NR>1)print $0 "\tHC\tWILD"}' HC.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHC-VA\tWILD"}' HC-VA.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tHI\tWILD"}' HI.fis.ae.per10kb.bed)  <(mawk '{if (NR>1)print $0 "\tNEH\tSELECTED"}' NEH.fis.ae.per10kb.bed)  <(mawk '{if (NR>1)print $0 "\tSM\tWILD"}' SM.fis.ae.per10kb.bed) <(mawk '{if (NR>1)print $0 "\tUMFS\tSELECTED"}' UMFS.fis.ae.per10kb.bed) > ../pop.windowed.ae.fis
+
+
+bedtools merge -i <(mawk '!/CHR/' pop.wild.windowed.fis| sort -k1,1 -k2,2n ) -c 4,5,7 -d -1 -o mean,mean,first > ../mean.pop.wild.windowed.fis
+bedtools merge -i <(mawk '!/CHR/' pop.selected.windowed.fis | sort -k1,1 -k2,2n ) -c 4,5,7 -d -1 -o mean,mean,first > ../mean.pop.selected.windowed.fis
+
+bedtools merge -i <(mawk '!/CHR/' pop.wild.windowed.ae.fis| sort -k1,1 -k2,2n ) -c 4,5,7 -d -1 -o mean,mean,first > ../mean.pop.wild.windowed.ae.fis
+bedtools merge -i <(mawk '!/CHR/' pop.selected.windowed.ae.fis | sort -k1,1 -k2,2n ) -c 4,5,7 -d -1 -o mean,mean,first > ../mean.pop.selected.windowed.ae.fis
+
+cd .. 
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tGROUP") mean.pop.wild.windowed.fis mean.pop.selected.windowed.fis > mean.pop.windowed.fis
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tGROUP") mean.pop.wild.windowed.ae.fis mean.pop.selected.windowed.ae.fis > mean.pop.windowed.ae.fis
+
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tGROUP") mean.pop.wild.windowed.fis > mean.pop.wild.windowed.fis.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tGROUP") mean.pop.selected.windowed.fis > mean.pop.selected.windowed.fis.txt
+
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tGROUP") mean.pop.wild.windowed.ae.fis > mean.pop.wild.windowed.ae.fis.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tEXP_HET\tFIS\tGROUP") mean.pop.selected.windowed.ae.fis > mean.pop.selected.windowed.ae.fis.txt
+
+mkdir -p ./Output/FIS
+cp pop.windowed.fis mean.pop.windowed.fis pop.windowed.ae.fis mean.pop.windowed.ae.fis ./Output/FIS
+```
+
+```{r}
+filename <- paste(prefix,"pop.windowed.fis", sep="")
+fis.wvd.dataframe<-read.table(filename, sep="\t", header=T)
+summary(fis.wvd.dataframe)
+fis.wvd.dataframe$GROUP <- factor(fis.wvd.dataframe$GROUP, levels=c("WILD", "SELECTED" ))
+fis.wvd.dataframe$POP <- factor(fis.wvd.dataframe$POP, levels=c("HI","SM","HC","CS","CLP","HC-VA","CL","SL","UMFS","NEH","DEBY","LOLA","OBOYS"))
+
+filename <- paste(prefix,"mean.pop.windowed.fis", sep="")
+fis.wvd.mean.dataframe<-read.table(filename, sep="\t", header=T)
+fis.wvd.mean.dataframe$GROUP <- factor(fis.wvd.mean.dataframe$GROUP, levels=c("WILD", "SELECTED" ))
+summary(fis.wvd.mean.dataframe)
+
+filename <- paste(prefix,"pop.windowed.ae.fis", sep="")
+fis.wvd.ae.dataframe<-read.table(filename, sep="\t", header=T)
+summary(fis.wvd.ae.dataframe)
+fis.wvd.ae.dataframe$GROUP <- factor(fis.wvd.ae.dataframe$GROUP, levels=c("WILD", "SELECTED" ))
+fis.wvd.ae.dataframe$POP <- factor(fis.wvd.ae.dataframe$POP, levels=c("HI","SM","HC","CS","CLP","HC-VA","UMFS","NEH"))
+
+filename <- paste(prefix,"mean.pop.windowed.ae.fis", sep="")
+fis.wvd.mean.ae.dataframe<-read.table(filename, sep="\t", header=T)
+fis.wvd.mean.ae.dataframe$GROUP <- factor(fis.wvd.mean.ae.dataframe$GROUP, levels=c("WILD", "SELECTED" ))
+summary(fis.wvd.mean.ae.dataframe)
+```
+
+```{r}
+bd.fis <-ggplot(fis.wvd.dataframe, aes(x=FIS,y = POP))+
+  #geom_violin(aes(color=GROUP,fill= GROUP)) +
+  #stat_summary(fun=mean, geom="point", shape=23, size=4)+
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=0.005)+
+  geom_boxplot(aes(fill=GROUP), width=0.75,outlier.shape = NA, outlier.color = "black")+
+  stat_summary(fun=mean, geom="point", shape=23, size=2)+
+  scale_fill_manual(values=c("#D55E00", "#009E73"))+
+  scale_color_manual(values=c("#D55E00", "#009E73"))+
+  scale_y_discrete(limits = rev(levels(fis.wvd.dataframe$POP)))+
+  #ylab("Population/Line")+
+  ggtitle("Wild vs. Selected *F*<sub>*IS*</sub>")+
+  coord_cartesian(xlim=c(0,1))+
+  theme_classic() +
+  labs(x="*F*<sub>*IS*</sub>") +theme(axis.title.x = element_markdown(),  axis.title.y = element_blank(), plot.title = element_markdown()) 
+
+
+bd.fis <- bd.fis + guides(color = "none", fill ="none")
+
+bd.fis.ae <-ggplot(fis.wvd.ae.dataframe, aes(x=FIS,y = POP))+
+  #geom_violin(aes(color=GROUP,fill= GROUP)) +
+  #stat_summary(fun=mean, geom="point", shape=23, size=4)+
+  #geom_dotplot(binaxis='y', stackdir='center', dotsize=0.005)+
+  geom_boxplot(aes(fill=GROUP), width=0.75,outlier.shape = NA, outlier.color = "black")+
+  stat_summary(fun=mean, geom="point", shape=23, size=2)+
+  scale_fill_manual(values=c("#D55E00", "#009E73"))+
+  scale_color_manual(values=c("#D55E00", "#009E73"))+
+  scale_y_discrete(limits = rev(levels(fis.wvd.dataframe$POP)))+
+  #ylab("Population/Line")+
+  ggtitle("Wild vs. Selected *F*<sub>*IS*</sub>")+
+  coord_cartesian(xlim=c(0,1))+
+  theme_classic() +
+  labs(x="*F*<sub>*IS*</sub>") +theme(axis.title.x = element_markdown(),  axis.title.y = element_blank(), plot.title = element_markdown()) 
+```
+
+```{r}
+bc.fis <-ggplot(fis.wvd.mean.dataframe, aes(x=FIS,y = GROUP))+
+  geom_violin(aes(color=GROUP,fill= GROUP),trim=TRUE) +
+  geom_boxplot(aes(fill=GROUP), width=0.1,outlier.shape = NA, outlier.color = "black")+
+  stat_summary(fun=mean, geom="point", shape=23, size=2)+
+  scale_fill_manual(values=c("#D55E00", "#009E73"))+
+  scale_color_manual(values=c("#D55E00", "#009E73"))+
+  scale_y_discrete(limits = rev(levels(fis.wvd.dataframe$GROUP)))+
+  #ylab("Origin")+
+  ggtitle("Wild vs. Selected *F*<sub>*IS*</sub>")+
+  theme_classic() +
+  scale_x_continuous(breaks=c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1))+
+  coord_cartesian(xlim=c(0,1))+
+  labs(x="*F*<sub>*IS*</sub>") +
+  theme(legend.position = c(0.85, 0.5), axis.title.y = element_blank(),axis.text.y=element_blank(), plot.title = element_markdown(),axis.title.x = element_markdown())
+
+bc.fis.ae <-ggplot(fis.wvd.mean.ae.dataframe, aes(x=FIS,y = GROUP))+
+  geom_violin(aes(color=GROUP,fill= GROUP),trim=TRUE) +
+  geom_boxplot(aes(fill=GROUP), width=0.1,outlier.shape = NA, outlier.color = "black")+
+  stat_summary(fun=mean, geom="point", shape=23, size=2)+
+  scale_fill_manual(values=c("#D55E00", "#009E73"))+
+  scale_color_manual(values=c("#D55E00", "#009E73"))+
+  scale_y_discrete(limits = rev(levels(fis.wvd.dataframe$GROUP)))+
+  #ylab("Origin")+
+  ggtitle("Wild vs. Selected *F*<sub>*IS*</sub> using Atlantic Samples Only")+
+  theme_classic() +
+  scale_x_continuous(breaks=c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1))+
+  coord_cartesian(xlim=c(0,1))+
+  labs(x="*F*<sub>*IS*</sub>") +
+  theme(legend.position = c(0.85, 0.5), axis.title.y = element_blank(),axis.text.y=element_blank(), plot.title = element_markdown(),axis.title.x = element_markdown())
+
+```
+
+
+```{r}
+fis.wvd.mean.dataframe %>% t_test(formula = FIS ~ GROUP, alternative = "two.sided",order = c("WILD", "SELECTED"))
+
+fis.wvd.mean.dataframe %>% t_test(formula = FIS ~ GROUP, alternative = "less", order = c("WILD", "SELECTED"))
+
+group_by(fis.wvd.mean.dataframe, GROUP) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(FIS, na.rm = TRUE),
+    sd = sd(FIS, na.rm = TRUE),
+    se=std.error(FIS, na.rm = TRUE) )
+
+
+group_by(fis.wvd.dataframe, POP) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(FIS, na.rm = TRUE),
+    sd = sd(FIS, na.rm = TRUE),
+    se=std.error(FIS, na.rm = TRUE) )
+
+test<- fis.wvd.dataframe[which(fis.wvd.dataframe$POP != "LOLA" & fis.wvd.dataframe$POP != "DEBY"),]
+
+test %>% t_test(formula = FIS ~ GROUP, alternative = "two.sided",order = c("WILD", "SELECTED"))
+
+test %>% t_test(formula = FIS ~ GROUP, alternative = "less", order = c("WILD", "SELECTED"))
+
+group_by(test, GROUP) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(FIS, na.rm = TRUE),
+    sd = sd(FIS, na.rm = TRUE),
+    se=std.error(FIS, na.rm = TRUE) )
+
+
+fis.wvd.mean.ae.dataframe %>% t_test(formula = FIS ~ GROUP, alternative = "two.sided",order = c("WILD", "SELECTED"))
+
+fis.wvd.mean.ae.dataframe %>% t_test(formula = FIS ~ GROUP, alternative = "less", order = c("WILD", "SELECTED"))
+
+group_by(fis.wvd.mean.ae.dataframe, GROUP) %>%
+  dplyr::summarise(
+    count = n(),
+    mean = mean(FIS, na.rm = TRUE),
+    sd = sd(FIS, na.rm = TRUE),
+    se=std.error(FIS, na.rm = TRUE) )
+```
+
+
+```{r}
+filename <- paste(prefix,"mean.pop.wild.windowed.fis.txt", sep="")
+wfis <- read.table(filename, header = TRUE)
+filename <- paste(prefix,"mean.pop.selected.windowed.fis.txt", sep="")
+dfis <- read.table(filename, header = TRUE)
+
+wfis <- wfis %>% dplyr::rename(WILD_FIS= FIS)
+dfis <- dfis %>% dplyr::rename(SELECTED_FIS= FIS)
+w.d.fis <- join(wfis,dfis, by =c("CHROM", "BIN_START"),type="full")
+
+
+w.d.fis$DIFF <- w.d.fis$WILD_FIS - w.d.fis$SELECTED_FIS
+
+```
+
+
+```{r}
+SNP<-c(1:(nrow(w.d.fis)))
+mydf<-data.frame(SNP,w.d.fis)
+mydf$CHR <- mydf$CHROM
+mydf %>% 
+  mutate(CHR = str_replace(CHR, "NC_035780.1", "1")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035781.1", "2")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035782.1", "3")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035783.1", "4")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035784.1", "5")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035785.1", "6")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035786.1", "7")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035787.1", "8")) %>%
+  mutate(CHR = str_replace(CHR, "NC_035788.1", "9")) %>% 
+  mutate(CHR = str_replace(CHR, "NC_035789.1", "10"))  -> mydf
+mydf$CHR <- as.numeric(mydf$CHR)  
+
+m2 <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="WILD_FIS",snp="SNP",logTransform=FALSE,sigLine=NA, relative.positions = TRUE)
+
+dfm <- m2[[1]]
+dfm$chrom_alt <- factor(dfm$chrom_alt, levels=c(0,1))
+
+dfmsplit <- split(dfm, dfm$chrom)
+xbreaks <- sapply(dfmsplit,function(x) {
+    midpoint <- length(x$index)/2
+    if(midpoint <1) midpoint <- 1
+    return(x$index[midpoint])
+})
+
+m2.total <- ggplot(dfm, aes(x= index, y=marker, colour = as.factor(chrom_alt)))+
+  geom_point(size=0.5, aes(alpha=0.33))+  
+  scale_x_continuous(breaks = xbreaks, labels = names(xbreaks),expand = c(0,0),limits = c(0,max(dfm$index)+10)) +
+  guides(colour = "none",alpha="none") +
+  scale_y_continuous(expand = c(0,0),limits=c(min(dfm$marker-0.001,na.rm=TRUE),1))+
+  labs(x = "Chromosome") +
+  ggtitle("Wild") +theme_classic()+
+  labs(y="*F*<sub>*IS*</sub>") +theme(axis.title.y = element_markdown())+ 
+  scale_color_manual(values=c("#D55E00", "#8f3e00")) 
+m2 <-m2.total
+
+
+
+m3 <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="SELECTED_FIS",snp="SNP",logTransform=FALSE,sigLine=NA, ymax=1, relative.positions = TRUE)
+
+dfm <- m3[[1]]
+dfm$chrom_alt <- factor(dfm$chrom_alt, levels=c(0,1))
+
+dfmsplit <- split(dfm, dfm$chrom)
+xbreaks <- sapply(dfmsplit,function(x) {
+    midpoint <- length(x$index)/2
+    if(midpoint <1) midpoint <- 1
+    return(x$index[midpoint])
+})
+
+m3.total <- ggplot(dfm, aes(x= index, y=marker, colour = as.factor(chrom_alt)))+
+  geom_point(size=0.5, aes(alpha=0.33))+  
+  scale_x_continuous(breaks = xbreaks, labels = names(xbreaks),expand = c(0,0),limits = c(0,max(dfm$index)+10)) +
+  guides(colour = "none",alpha="none") +
+  scale_y_continuous(expand = c(0,0),limits=c(min(dfm$marker-0.001,na.rm=TRUE),1))+
+  #scale_alpha_continuous(range=c(0.1,0.95))+
+  labs(x = "Chromosome") +
+  ggtitle("Selected") +theme_classic()+
+  labs(y="*F*<sub>*IS*</sub>") +theme(axis.title.y = element_markdown())+ 
+  scale_color_manual(values=c("#009E73", "#00543d"))
+
+m3 <-m3.total
+
+
+md4 <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="DIFF",snp="SNP",logTransform=FALSE,sigLine=NA, relative.positions = TRUE)
+
+dfm <- md4[[1]]
+dfm$chrom_alt <- factor(dfm$chrom_alt, levels=c(0,1))
+
+dfmsplit <- split(dfm, dfm$chrom)
+xbreaks <- sapply(dfmsplit,function(x) {
+    midpoint <- length(x$index)/2
+    if(midpoint <1) midpoint <- 1
+    return(x$index[midpoint])
+})
+
+md4 <- ggplot(dfm, aes(x= index, y=marker, colour = as.factor(chrom_alt),size=(0.1+ abs(marker))^2))+
+  geom_point(alpha=0.85)+  
+  scale_size_continuous(range=c(0.01,1.5))+
+  scale_x_continuous(breaks = xbreaks, labels = names(xbreaks),expand = c(0,0),limits = c(0,max(dfm$index)+10)) +
+  guides(colour = "none",alpha="none",size="none") +
+  scale_y_continuous(expand = c(0,0),limits=c(-1,1))+
+  #scale_alpha_continuous(range=c(0.1,0.95))+
+  labs(x = "Chromosome") +
+  ggtitle("Wild - Domestic") +theme_classic()+
+  labs(y="Difference in *F*<sub>*IS*</sub>") +theme(axis.title.y = element_markdown())+ 
+  scale_color_manual(values=c("#7d5700", "#634500"))
+
+
+
+png(filename=paste(prefix.OF,"Figure.2.FIS.Comparison.W.S.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+layout <- "
+AAADD
+BBBDD
+CCCEE
+CCCFF
+"
+m2+m3+md4+bd.fis+bc.fis+bc.fis.ae +plot_layout(design=layout, guides = "collect") + plot_annotation(tag_levels = 'A')
+dev.off()
+```
+
+
 
 ## CNV Diversity
 ```{r}
@@ -2460,7 +2775,7 @@ cnv.plot(paste(prefix,"mean.pop.wild.windowed.cnv.txt", sep=""),paste(prefix,"me
 ```
 
 ```{r}
-png(filename=paste(prefix.OFS,"Figure.S6.CNV.Richness.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S7.CNV.Richness.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "
 AADD
 BBDD
@@ -2472,7 +2787,7 @@ m2.ar+m3.ar+md4.ar+bd.cnv.ar+bc.cnv.ar+bc.cnv.ae.ar +plot_layout(design=layout, 
 dev.off()
  
 
-png(filename=paste(prefix.OFS,"Figure.S7.CNV.Diversity.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S8.CNV.Diversity.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "
 AADD
 BBDD
@@ -2493,7 +2808,7 @@ cnv.plot(filenamew,filenames)
 ```
 
 ```{r}
-png(filename=paste(prefix.OFS,"Figure.S8.CNV.ae.Richness.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S9.CNV.ae.Richness.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "
 AADD
 BBDD
@@ -2505,7 +2820,7 @@ EEDD
 m2.ar+m3.ar+md4.ar+bd.cnv.ae.ar+bc.cnv.ae.ar +plot_layout(design=layout, guides = "collect") + plot_annotation(tag_levels = 'A')
 dev.off()
 
-png(filename=paste(prefix.OFS,"Figure.S9.CNV.ae.Diversity.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S10.CNV.ae.Diversity.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "
 AADD
 BBDD
@@ -3484,7 +3799,7 @@ dev.off()
 ```
 
 ```{r}
-filename <- paste(prefix.OFS,"Figure.S10.Large.FST.DI.Outlier.png", sep="")
+filename <- paste(prefix.OFS,"Figure.S11.Large.FST.DI.Outlier.png", sep="")
 png(filename=filename, type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 
 layout <-" 
@@ -3876,7 +4191,7 @@ layout <- "ABBBBBBBBBBBBBBBBBBBBBB"
 s_p <- lab.plot + cnv.plot +plot_layout(design=layout, guides = "collect")
 
 
-png(filename=paste(prefix.OFS,"Figure.S11.CNV_Divergence.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S12.CNV_Divergence.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 layout <- "AAAAAAAAAAAAAAAAAAAAAAADDDDDDDDDFFF
            AAAAAAAAAAAAAAAAAAAAAAADDDDDDDDDFFF
            BCCCCCCCCCCCCCCCCCCCCCCEEEEEEEEEFFF
@@ -4329,7 +4644,7 @@ pca_wildAE_12pp <- pca_wildAE_12p + guides(shape="none")
 plot_fin_1 <- m2o.m1 + wrap_elements(full=sub_pp) +  pca_wildAE_12pp  +   pca.out.plot1+  guide_area()+  plot_layout(design=layout, guides = "collect") + theme(legend.text =element_text(size=10)) + plot_annotation(tag_levels = 'A')
 
 
-png(filename=paste(prefix.OFS,"Figure.S12.WildAe.FST.Large_inversions.outliers.png", sep=""), type="cairo",units="px", width=6800, height=3800, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S14.WildAe.FST.Large_inversions.outliers.png", sep=""), type="cairo",units="px", width=6800, height=3800, res=300, bg="transparent")
   plot_fin_1
   dev.off()
 
@@ -4373,7 +4688,7 @@ plot_sub <- (gp.plot.1.vcf3.out | gp.plot.2.vcf3.out | gp.plot.3.vcf3.out | gp.p
   
 plot_fin_3 <-m2o.m3 +  wrap_elements(full=plot_sub) +  pca_wildAE_12pp + pca.out.plot3  + guide_area() +  plot_layout(design=layout, guides = "collect") + plot_annotation(tag_levels = 'A')+ theme(legend.text =element_text(size=10)) 
 
-png(filename=paste(prefix.OFS,"Figure.S14.WildAe.FST.no_inversion_outliers.png", sep=""), type="cairo",units="px", width=6120, height=3420, res=300, bg="transparent")
+png(filename=paste(prefix.OFS,"Figure.S15.WildAe.FST.no_inversion_outliers.png", sep=""), type="cairo",units="px", width=6120, height=3420, res=300, bg="transparent")
   plot_fin_3
   dev.off()  
 ```
