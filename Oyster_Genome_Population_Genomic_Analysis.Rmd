@@ -650,11 +650,18 @@ write(paste(CHR.m.ni[attr(svd.m.ni, "subset")],
 ```{bash,eval=F, echo=F}
 rm ./Population_Genomics/random.50k.masked.snps
 
-cut -f1 ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.maskedPCs.txt | uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.maskedPCs.txt | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -50000" >> ./Population_Genomics/random.50k.masked.snps
+cut -f1 ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.maskedPCs.txt | uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.maskedPCs.txt | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -5000" >> ./Population_Genomics/random.50k.masked.snps
+
+bedtools subtract -a <(mawk '{print $1"\t"$2-1"\t"$2}' ./Population_Genomics//Intermediate_Files/NoInbredLociLocationsAfterThinning.maskedPCs.txt) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed > ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.NoLI.bed
+
+cut -f1 ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.maskedPCs.txt | uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/NoInbredLociLocationsAfterThinning.NoLI.bed | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -5000 | cut -f1,3 " >>  ./Population_Genomics/random.50k.masked.snps2
+
+
+
 
 bcftools index --threads 40 ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz
 
-bcftools view --threads 40 -R <(sort ./Population_Genomics/random.50k.masked.snps) ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -O z -o ./Population_Genomics/Random.50k.SNP.MASKED.noinbred.g1.maf05.max2alleles.FIL.vcf.gz
+bcftools view --threads 40 -R <(sort ./Population_Genomics/random.50k.masked.snps2) ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -O z -o ./Population_Genomics/Random.50k.SNP.MASKED.noinbred.g1.maf05.max2alleles.FIL.vcf.gz
 
 plink2 --vcf ./Population_Genomics/Random.50k.SNP.MASKED.noinbred.g1.maf05.max2alleles.FIL.vcf.gz --make-bed --out ./Population_Genomics/Random.50k.masked --allow-extra-chr
 
@@ -778,9 +785,17 @@ rm ./Population_Genomics/random.50k.masked.wild.snps
 
 cut -f1 ./Population_Genomics/Intermediate_Files/WildLociLocationsAfterThinning.maskedPCs.txt | uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/WildLociLocationsAfterThinning.maskedPCs.txt | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -5000" >> ./Population_Genomics/random.50k.masked.wild.snps
 
+
+bedtools subtract -a <(mawk '{print $1"\t"$2-1"\t"$2}' ./Population_Genomics//Intermediate_Files/WildLociLocationsAfterThinning.maskedPCs.txt) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed > ./Population_Genomics/Intermediate_Files/WildLociLocationsAfterThinning.NoLI.bed
+
+cut -f1 ./Population_Genomics/Intermediate_Files/WildLociLocationsAfterThinning.maskedPCs.txt | uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/WildLociLocationsAfterThinning.NoLI.bed | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -5000 | cut -f1,3 " >>  ./Population_Genomics/random.50k.masked.wild.snps2
+
+
+
+
 bcftools index --threads 40 ./Population_Genomics/SNP.MASKED.wild.g1.maf05.max2alleles.FIL.vcf.gz
 
-bcftools view --threads 40 -R <(sort ./Population_Genomics/random.50k.masked.wild.snps) ./Population_Genomics/SNP.MASKED.wild.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Random.50k.SNP.MASKED.wild.g1.maf05.max2alleles.FIL.vcf.gz
+bcftools view --threads 40 -R <(sort ./Population_Genomics/random.50k.masked.wild.snps2) ./Population_Genomics/SNP.MASKED.wild.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Random.50k.SNP.MASKED.wild.g1.maf05.max2alleles.FIL.vcf.gz
 
 plink2 --vcf ./Population_Genomics/Random.50k.SNP.MASKED.wild.g1.maf05.max2alleles.FIL.vcf.gz --make-bed --out ./Population_Genomics/Random.50k.masked.wild --allow-extra-chr
 
@@ -829,6 +844,12 @@ write(paste(CHR.m.wae[attr(svd.m.wildae, "subset")],
 ```{bash,eval=F, echo=F}
 rm ./Population_Genomics/random.50k.wildAE.snps &> /dev/null
 cut -f1 ./Population_Genomics/Intermediate_Files/WildAELociLocationsAfterThinningmaskedPCs.txt| uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/WildAELociLocationsAfterThinningmaskedPCs.txt | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -5000" >> ./Population_Genomics/random.50k.wildAE.snps
+
+bedtools subtract -a <(mawk '{print $1"\t"$2-1"\t"$2}' ./Population_Genomics//Intermediate_Files/WildAELociLocationsAfterThinningmaskedPCs.txt) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed > ./Population_Genomics/Intermediate_Files/WildAELociLocationsAfterThinning.NoLI.bed
+
+cut -f1 ./Population_Genomics/Intermediate_Files/WildAELociLocationsAfterThinningmaskedPCs.txt | uniq | parallel "grep {} ./Population_Genomics/Intermediate_Files/WildAELociLocationsAfterThinning.NoLI.bed | shuf  2>/dev/null | shuf 2>/dev/null | shuf 2>/dev/null| head -5000 | cut -f1,3 " >>  ./Population_Genomics/random.50k.wildAE.snps2
+
+
 
 bcftools view --threads 40 -R <(sort ./Population_Genomics/random.50k.wildAE.snps) ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Random.50k.SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz
 
@@ -965,10 +986,10 @@ Load FST Data if needed
 # To load the data again
 load("FST_data.RData")
 ```
-
+#### Evaluating OutFLANK with trimmed SNPs ####
 
 ```{r}
-#### Evaluating OutFLANK with trimmed SNPs ####
+
 out_trim.m <- OutFLANK(my_fst.comp.m.r, NumberOfSamples=13, qthreshold = 0.05, Hmin = 0.1)
 str(out_trim.m)
 head(out_trim.m$results)
@@ -1020,7 +1041,7 @@ P1.m.w <- P1.m.w[order(as.numeric(rownames(P1.m.w))),,drop=FALSE]
 hist(P1.m.w$pvaluesRightTail)
 
 P1.m.wae <- pOutlierFinderChiSqNoCorr(my_fst.wildae.m, Fstbar = out_trim.m.wae$FSTNoCorrbar, 
-                                   dfInferred = out_trim.m.wae$dfInferred, qthreshold = 0.0005, Hmin=0.1)
+                                   dfInferred = out_trim.m.wae$dfInferred, qthreshold = 0.001, Hmin=0.1)
 
 P1.m.wae <- P1.m.wae[order(as.numeric(rownames(P1.m.wae))),,drop=FALSE]                  
 hist(P1.m.wae$pvaluesRightTail)
@@ -1075,7 +1096,7 @@ withr::with_options(c(scipen = 10),write(paste(m.wae.plot.df$CHRR,m.wae.plot.df$
 
 
 ```{bash}
-bedtools intersect -b <(sort -k 1,1 -k2,2n ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -a <(sort -k 1,1 -k2,2n ./other_files/10kb.bed) -wa -wb -sorted  |bedtools merge -d -1 -c 7,8 -o mean,distinct | mawk '{ if ($0 ~ /TRUE/) {print $1 "\t" $2 "\t" $3 "\t" $4 "\tTRUE"} else {print $0}}' > ./Population_Genomics/masked.OF_fst.10kb.bed
+bedtools intersect -b <(sort -k 1,1 -k2,2n ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -a <(sort -k 1,1 -k2,2n ./other_files/10kb.bed) -wa -wb -sorted  |bedtools merge -d -1 -c 7,8 -o mean,distinct | mawk '{ if ($0 ~ /TRUE/) {print $1 "\t" $2 "\t" $3 "\t" $4 "\tTRUE"} else {print $0}}' > ./Population_Genomics/masked.OF_fst.10kb.bed    
 cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\tOUTLIER") ./Population_Genomics/masked.OF_fst.10kb.bed > ./Population_Genomics/masked.OF_fst.10kb.txt
 mkdir -p ./Population_Genomics/Output/Fst
 cp ./Population_Genomics/Masked_Wild_FST_Outflank.bed ./Population_Genomics/Masked_WildAE_FST_Outflank.bed ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed ./Population_Genomics/Output/Fst/
@@ -3169,7 +3190,14 @@ cp ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed ./Popu
 #
 #bedtools intersect -a Masked_NoInbred_FST_Outflank.bed -b big.inv.pi.het.site.bed | mawk '$5 ~/TR/' > #inversion.fst.pi.het.outliers.bed
 
-bedtools intersect -a ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | mawk '$5 ~/TR/' > ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed
+CUTOFFP=$(awk '{ a[NR]=$4 } END { n=asort(a); print a[int(n*0.95)] }' ./Population_Genomics/masked.OF_fst.10kb.bed)
+
+#bedtools intersect -a ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | mawk '$5 ~/TR/' > ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed
+
+bedtools intersect -a ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | mawk '$5 ~/TR/' > ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.full.bed
+
+bedtools intersect -a ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.full.bed -b <(mawk -v "x=$CUTOFFP" '$4 > x' ./Population_Genomics/masked.OF_fst.10kb.bed) > ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed
+
 
 bcftools view --threads 40 ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -R ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed -O z -o ./Population_Genomics/Large.inversion.outliers.vcf.gz
 
@@ -3513,81 +3541,111 @@ dev.off()
 ## Outliers outside of large Inversions
 
 ```{r}
-fst <- read.table("./Population_Genomics/masked.OF_fst.10kb.txt", header=TRUE)
-fst <- fst %>% dplyr::mutate(fst50 = zoo::rollmean(WEIGHTED_FST, k = 5,fill = c(0,0,0)), fst100 = zoo::rollmean(WEIGHTED_FST, k = 10,fill = c(0,0,0)), fst500 = zoo::rollmean(WEIGHTED_FST, k = 50,fill = c(0,0,0)), fst1000 = zoo::rollmean(WEIGHTED_FST, k = 100,fill = c(0,0,0)))
-
-SNP <-c(1:(nrow(fst)))
-mydf<-data.frame(SNP,fst)
-mydf$CHR <- mydf$CHROM
-mydf %>% 
-  mutate(CHR = str_replace(CHR, "NC_035780.1", "1")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035781.1", "2")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035782.1", "3")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035783.1", "4")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035784.1", "5")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035785.1", "6")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035786.1", "7")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035787.1", "8")) %>%
-  mutate(CHR = str_replace(CHR, "NC_035788.1", "9")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035789.1", "10"))  -> mydf
-
-mydf$CHR <- as.numeric(mydf$CHR)  
-
-md4.fst <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="WEIGHTED_FST",snp="SNP",logTransform=FALSE,sigLine=NA, relative.positions = TRUE)
-
-dfm <- md4.fst[[1]]
-
-dfmsplit <- split(dfm, dfm$chrom)
-
-xbreaks <- sapply(dfmsplit,function(x) {
-    midpoint <- length(x$index)/2
-    if(midpoint <1) midpoint <- 1
-    return(x$index[midpoint])
-})  
-
-
-top95.dfm <- dfm[which(dfm$WEIGHTED_FST > quantile(dfm$WEIGHTED_FST,0.95) & dfm$fst50 > quantile(dfm$fst50,0.95) & dfm$fst100 > quantile(dfm$fst100,0.95)),]
-
-write(paste(top95.dfm$CHROM, top95.dfm$BIN_START,top95.dfm$BIN_END,top95.dfm$WEIGHTED_FST, sep='\t'),
-      "./Population_Genomics/top95.rolling.FST.bed")
+#fst <- read.table("./Population_Genomics/masked.OF_fst.10kb.txt", header=TRUE)
+#fst <- fst %>% dplyr::mutate(fst50 = zoo::rollmean(WEIGHTED_FST, k = 5,fill = c(0,0,0)), fst100 = #zoo::rollmean(WEIGHTED_FST, k = 10,fill = c(0,0,0)), fst500 = zoo::rollmean(WEIGHTED_FST, k = 50,fill = #c(0,0,0)), fst1000 = zoo::rollmean(WEIGHTED_FST, k = 100,fill = c(0,0,0)))
+#
+#SNP <-c(1:(nrow(fst)))
+#mydf<-data.frame(SNP,fst)
+#mydf$CHR <- mydf$CHROM
+#mydf %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035780.1", "1")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035781.1", "2")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035782.1", "3")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035783.1", "4")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035784.1", "5")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035785.1", "6")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035786.1", "7")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035787.1", "8")) %>%
+#  mutate(CHR = str_replace(CHR, "NC_035788.1", "9")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035789.1", "10"))  -> mydf
+#
+#mydf$CHR <- as.numeric(mydf$CHR)  
+#
+#md4.fst <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="WEIGHTED_FST",snp="SNP",logTransform=FALSE,sigLine=NA, #relative.positions = TRUE)
+#
+#dfm <- md4.fst[[1]]
+#
+#dfmsplit <- split(dfm, dfm$chrom)
+#
+#xbreaks <- sapply(dfmsplit,function(x) {
+#    midpoint <- length(x$index)/2
+#    if(midpoint <1) midpoint <- 1
+#    return(x$index[midpoint])
+#})  
+#
+#
+#top95.dfm <- dfm[which(dfm$WEIGHTED_FST > quantile(dfm$WEIGHTED_FST,0.95) & dfm$fst50 > quantile(dfm$fst50,0.95) #& dfm$fst100 > quantile(dfm$fst100,0.95)),]
+#
+#write(paste(top95.dfm$CHROM, top95.dfm$BIN_START,top95.dfm$BIN_END,top95.dfm$WEIGHTED_FST, sep='\t'),
+#      "./Population_Genomics/top95.rolling.FST.bed")
 ```
 
 ```{bash}
+#bedtools merge -i ./Population_Genomics/top95.rolling.FST.bed -c 4 -o max -d 10000 | mawk '$3 - $2 > 100000' > #./Population_Genomics/95%.outlier.merged.bed
+#
+#bedtools intersect -a ./Population_Genomics/top95.rolling.FST.bed -b #./Population_Genomics/95%.outlier.merged.bed > ./Population_Genomics/95%.outlier.10kb.bed
+#
+#
+#bedtools intersect -v -a ./Population_Genomics/95%.outlier.10kb.bed -b #./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed > #./Population_Genomics/95%.outlier.10kb.no_large_inversion.bed
+#
+#
+#bedtools intersect -v -a ./Population_Genomics/95%.outlier.10kb.no_large_inversion.bed -b #./Population_Genomics/Intermediate_Files/delly.merged.inversions.masked.bed > #./Population_Genomics/95%.outlier.10kb.no_inversion.bed 
+#
+#
+#bedtools intersect -a ./Population_Genomics/95%.outlier.10kb.no_large_inversion.bed -b #./Population_Genomics/Intermediate_Files/delly.merged.inversions.masked.bed  > #./Population_Genomics/95%.outlier.10kb.delly.inversion.bed
+#
+#
+#
+#bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b #./Population_Genomics/95%.outlier.10kb.no_inversion.bed | grep TRUE > #./Population_Genomics/95%.outlier.SNPs.no_inversion.bed
+#
+#bedtools subtract -a <(grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b #./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools subtract -a - -b -b #./Population_Genomics/Intermediate_Files/delly.merged.inversions.masked.bed | wc -l
+#
+#
+#
+#bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b #./Population_Genomics/95%.outlier.10kb.delly.inversion.bed | grep TRUE > #./Population_Genomics/95%.outlier.SNPs.delly.inversion.bed
+#
+#
+#bedtools intersect -a ./Population_Genomics/masked.OF_fst.10kb.bed -b #./Population_Genomics/95%.outlier.10kb.no_inversion.bed | grep TRUE | cut -f1-4,6 > #./Population_Genomics/95%.10kb.OF.FST.bed
+#
+#bedtools intersect -a ./Population_Genomics/masked.OF_fst.10kb.bed -b #./Population_Genomics/95%.outlier.10kb.delly.inversion.bed | grep TRUE | cut -f1-4,6 > #./Population_Genomics/95%.10kb.OF.delly.inversion.FST.bed
+#
+#cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95")  <(mawk '{print $0 "\tTRUE"}' #./Population_Genomics/95%.10kb.OF.FST.bed) > ./Population_Genomics/95%.outlier.10kb.ni.txt
+#
+#cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\tDI95")  <(mawk '{print $0 "\tTRUE"}' #./Population_Genomics/95%.10kb.OF.delly.inversion.FST.bed) > #./Population_Genomics/95%.outlier.10kb.delly.inversion.txt
 
-bedtools merge -i ./Population_Genomics/top95.rolling.FST.bed -c 4 -o max -d 10000 | mawk '$3 - $2 > 100000' > ./Population_Genomics/95%.outlier.merged.bed
+```
 
-bedtools intersect -a ./Population_Genomics/top95.rolling.FST.bed -b ./Population_Genomics/95%.outlier.merged.bed > ./Population_Genomics/95%.outlier.10kb.bed
+```{bash}
+# Calculate 95% of FST values for 10kb windows
 
+CUTOFFP=$(awk '{ a[NR]=$4 } END { n=asort(a); print a[int(n*0.99)] }' ./Population_Genomics/masked.OF_fst.10kb.bed)
 
-bedtools intersect -v -a ./Population_Genomics/95%.outlier.10kb.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed > ./Population_Genomics/95%.outlier.10kb.no_large_inversion.bed
+bedtools subtract -a <(grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools subtract -a - -b ./Population_Genomics/sv.full.bed > ./Population_Genomics/Outlier.SNPs.no_inversion.full.bed
 
-
-bedtools intersect -v -a ./Population_Genomics/95%.outlier.10kb.no_large_inversion.bed -b ./Population_Genomics/Intermediate_Files/delly.merged.inversions.masked.bed > ./Population_Genomics/95%.outlier.10kb.no_inversion.bed 
-
-
-bedtools intersect -a ./Population_Genomics/95%.outlier.10kb.no_large_inversion.bed -b ./Population_Genomics/Intermediate_Files/delly.merged.inversions.masked.bed  > ./Population_Genomics/95%.outlier.10kb.delly.inversion.bed
+bedtools intersect -a ./Population_Genomics/Outlier.SNPs.no_inversion.full.bed -b <(mawk -v "x=$CUTOFFP" '$4 > x' ./Population_Genomics/masked.OF_fst.10kb.bed) > ./Population_Genomics/Outlier.SNPs.no_inversion.bed
 
 
+bedtools subtract -a <(grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools intersect -a - -b ./Population_Genomics/Intermediate_Files/delly.merged.inversions.masked.bed > ./Population_Genomics/Outlier.SNPs.delly.inversion.full.bed
 
-bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b ./Population_Genomics/95%.outlier.10kb.no_inversion.bed | grep TRUE > ./Population_Genomics/95%.outlier.SNPs.no_inversion.bed
+bedtools intersect -a ./Population_Genomics/Outlier.SNPs.delly.inversion.full.bed -b <(mawk -v "x=$CUTOFFP" '$4 > x' ./Population_Genomics/masked.OF_fst.10kb.bed) > ./Population_Genomics/Outlier.SNPs.delly.inversion.bed
 
-bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b ./Population_Genomics/95%.outlier.10kb.delly.inversion.bed | grep TRUE > ./Population_Genomics/95%.outlier.SNPs.delly.inversion.bed
+bedtools intersect -wa -a ./Population_Genomics/masked.OF_fst.10kb.bed -b ./Population_Genomics/Outlier.SNPs.no_inversion.bed | uniq | cut -f1-4,6 > ./Population_Genomics/10kb.OF.FST.bed
 
 
-bedtools intersect -a ./Population_Genomics/masked.OF_fst.10kb.bed -b ./Population_Genomics/95%.outlier.10kb.no_inversion.bed | grep TRUE | cut -f1-4,6 > ./Population_Genomics/95%.10kb.OF.FST.bed
+#bedtools intersect -wa -a ./Population_Genomics/masked.OF_fst.10kb.bed -b ./Population_Genomics/Outlier.SNPs.no_inversion.bed | uniq -c | mawk '{if ($1 > 1 && $5 > 0.15) print $2"\t"$3"\t"$4"\t"$5}' > ./Population_Genomics/10kb.OF.FST.bed2
 
-bedtools intersect -a ./Population_Genomics/masked.OF_fst.10kb.bed -b ./Population_Genomics/95%.outlier.10kb.delly.inversion.bed | grep TRUE | cut -f1-4,6 > ./Population_Genomics/95%.10kb.OF.delly.inversion.FST.bed
+bedtools intersect -wa -a ./Population_Genomics/masked.OF_fst.10kb.bed -b ./Population_Genomics/Outlier.SNPs.delly.inversion.bed | uniq | cut -f1-4,6 > ./Population_Genomics/10kb.OF.delly.inversion.FST.bed
 
-cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/95%.10kb.OF.FST.bed) > ./Population_Genomics/95%.outlier.10kb.ni.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/10kb.OF.FST.bed) > ./Population_Genomics/Outlier.10kb.ni.txt
 
-cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\tDI95")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/95%.10kb.OF.delly.inversion.FST.bed) > ./Population_Genomics/95%.outlier.10kb.delly.inversion.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\tDI95")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/10kb.OF.delly.inversion.FST.bed) > ./Population_Genomics/Outlier.10kb.delly.inversion.txt
 
 ```
 
 ```{r}
 fst<-read.table("./Population_Genomics/masked.OF_fst.10kb.txt", header=TRUE)
-Ffst <- read.table("./Population_Genomics/95%.outlier.10kb.ni.txt", header=TRUE)
-DIfst <- read.table("./Population_Genomics/95%.outlier.10kb.delly.inversion.txt", header=TRUE)
+Ffst <- read.table("./Population_Genomics/Outlier.10kb.ni.txt", header=TRUE)
+DIfst <- read.table("./Population_Genomics/Outlier.10kb.delly.inversion.txt", header=TRUE)
 big.fst <- join(fst,Ffst, by =c("CHROM", "BIN_START"),type="full")
 big.fst <- join(big.fst,DIfst, by =c("CHROM", "BIN_START"),type="full")
 
@@ -3618,7 +3676,9 @@ dfm.sub2 <- dfm[which(dfm$DI95 == TRUE),]
 
 #dfm.sub1 <- top95.dfm
   
-dfm.plot <- anti_join(dfm, dfm.sub1, by=c("CHROM", "BIN_START"))
+#dfm.plot <- anti_join(dfm, dfm.sub1, by=c("CHROM", "BIN_START"))
+
+dfm.plot <- dfm
 
 dfmsplit <- split(dfm, dfm$chrom)
 xbreaks <- sapply(dfmsplit,function(x) {
@@ -3649,15 +3709,15 @@ m2oDI.m <-m2.m+geom_point(data=dfm.sub2,alpha=0.8,size=2.5,shape=21, stroke = 0.
 
 ```{bash eval = FALSE}
 
-bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.no_inversion.bed ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -O z -o ./Population_Genomics/Top.outliers.noinversions.vcf.gz
+bcftools view --threads 40 -R ./Population_Genomics/Outlier.SNPs.no_inversion.bed ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -O z -o ./Population_Genomics/Top.outliers.noinversions.vcf.gz
 
 bcftools index ./Population_Genomics/Top.outliers.noinversions.vcf.gz
 
-bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.delly.inversion.bed ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -O z -o ./Population_Genomics/Top.delly.inversion.outliers.vcf.gz
+bcftools view --threads 40 -R ./Population_Genomics/Outlier.SNPs.delly.inversion.bed ./Population_Genomics/SNP.MASKED.noinbred.TRSdp5g75.nDNA.g1.maf05.max2alleles.nomissing.FIL.vcf.gz -O z -o ./Population_Genomics/Top.delly.inversion.outliers.vcf.gz
 
 bcftools index ./Population_Genomics/Top.delly.inversion.outliers.vcf.gz
 
-cp ./Population_Genomics/Top.delly.inversion.outliers.vcf.gz ./Population_Genomics/Top.outliers.noinversions.vcf.gz ./Population_Genomics/95%.outlier.SNPs.no_inversion.bed ./Population_Genomics/95%.outlier.SNPs.delly.inversion.bed ./Population_Genomics/Output/Outliers
+cp ./Population_Genomics/Top.delly.inversion.outliers.vcf.gz ./Population_Genomics/Top.outliers.noinversions.vcf.gz ./Population_Genomics/Outlier.SNPs.no_inversion.bed ./Population_Genomics/Outlier.SNPs.delly.inversion.bed ./Population_Genomics/Output/Outliers
 ```
 
 ```{r}
@@ -3690,8 +3750,8 @@ plot_pal <- c(col_pal[as.integer(chrom)],wes_palette("IsleofDogs1"))
 outlier.gp <- genotype_plot(vcf=vcf,chr= ncbi,popmap = gp.popmap, start=1, end=94778955,cluster=FALSE,colour_scheme=plot_pal) 
 
 
-dfx <- min(ggplot_build(outlier.gp$genotypes)$data[[1]]$x) 
-dfmax <- max(ggplot_build(outlier.gp$genotypes)$data[[1]]$x)
+dfx <- min(ggplot_build(outlier.gp$genotypes)$data[[1]]$xmin) 
+dfmax <- max(ggplot_build(outlier.gp$genotypes)$data[[1]]$xmax)
 dflen <- length(ggplot_build(outlier.gp$genotypes)$data[[1]]$x)/78
 #dfgt <-length(ggplot_build(outlier.gp$genotypes))
 
@@ -3699,19 +3759,30 @@ dloc <- (dfmax-dfx)/dflen
 print(dloc)
 print(dflen)
 
-if(dloc > 50000 & dflen > 50){
-  dloc <- dloc/3
-}
+#if(dloc > 50000 & dflen > 50){
+ # dloc <- dloc/3
+#}
 
-if(dloc > 50000 & dflen < 50){
-  dloc <- dloc/2
-}
+#if(dloc > 50000 & dflen < 50){
+#  dloc <- dloc/2
+#}
 
 #ddelta <- dloc*dflen/20
 
-if(dflen > 500){
+
+#ddelta <- dloc * (dflen/dloc)
+#dddelta <- ddelta / (20*dflen/dloc )
+
+
+if(dflen > 1500){
   #ddelta <- dloc*dflen/20
-  ddelta <- dloc*50
+  ddelta <- dloc*60
+  dddelta <- ddelta/10000
+  }else if(dflen > 650 & dflen < 1500){
+  ddelta <- dloc*40
+  dddelta <- ddelta/10000
+  }else if(dflen > 500 & dflen < 650){
+  ddelta <- dloc*30
   dddelta <- ddelta/10000
   }else if(dflen < 500 & dflen > 200){
   ddelta <- dloc*15
@@ -3720,14 +3791,28 @@ if(dflen > 500){
   ddelta <- dloc*10
   dddelta <- ddelta/100
   }else if(dflen < 100 & dflen > 20){
-  ddelta <- dloc*5
+  ddelta <- dloc*6
+  dddelta <- ddelta/20
+  }else if(dflen < 10 & dflen > 1){
+  ddelta <- dloc*.5
   dddelta <- ddelta/10
-  } else{
+  }else{
   ddelta <- dloc*5
   dddelta <- ddelta/1
   }
 
+print(dloc)
+print(dflen)
 
+print(ddelta)
+print(dddelta)
+
+
+#ddelta <- 2000000 * (dflen/800)
+#dddelta <- ddelta/(10^(3 * dflen/800))   
+
+#print(ddelta)
+#print(dddelta)
   
 dfx <- dfx -ddelta/2
 #ddelta <- ddelta/2
@@ -3739,7 +3824,7 @@ new_df$Y <- 78:1
 new_df$X <- rep(c(dfx-0,dfx-ddelta/2,dfx-ddelta,dfx-ddelta,dfx-ddelta/2,dfx-0),13)
 
 
-fig <- outlier.gp$genotypes + geom_point(data=new_df,aes(x=X,y=Y,shape=Type, color=POP, size=Type)) + scale_x_continuous(expand = c(0, 0), limits = c(min(new_df$X) - ddelta/2 , max(ggplot_build(outlier.gp$genotypes)$data[[1]]$x) +dddelta)) + scale_color_manual(values=p_noinbred , name="Population/Line") +
+fig <- outlier.gp$genotypes + geom_point(data=new_df,aes(x=X,y=Y,shape=Type, color=POP, size=Type)) + scale_x_continuous(expand = c(0, 0), limits = c(min(new_df$X) - ddelta , NA)) + scale_color_manual(values=p_noinbred , name="Population/Line") +
 theme(legend.text = element_text(size=12),legend.position = "right", legend.title=element_text(size=14),axis.text.y = element_blank())+
 scale_shape_manual(values=c(18,16),name="Origin") +
 scale_size_manual(values=c(3.0,2.5),name="Origin", guide="none") +
@@ -3760,19 +3845,20 @@ assign(paste("gp.plot",chrom,pre,"out", sep="."),fig, envir = globalenv())
 ```
 
 
+
 ```{r , message=FALSE, warning=FALSE, echo=FALSE}
-for(i in c(2,3,5,7,8)){
+for(i in c(1,2,3,4,5,6,7,8,9,10)){
   Chrom_Outlier_GP_Plot(chroms[i],ncbis[i], "./Population_Genomics/Top.outliers.noinversions.vcf.gz","SNP")
 }
-gp.plot.2.SNP.out<- gp.plot.2.SNP.out+
+gp.plot.1.SNP.out<- gp.plot.1.SNP.out+
 guides(fill = guide_legend(override.aes = list(size=6)),shape=guide_legend(override.aes = list(size=6, shape=c(23,21)) ))+ 
 guides(color=guide_legend(override.aes = list(size=6, shape=c(16,16,18,18,16,16,18,16,16,18,16,16,18))))
 
-for(i in c(2,3,4,5,7,8)){
+for(i in c(1,2,3,4,5,7,8,9)){
 #for(i in c(2,3)){
   Chrom_Outlier_GP_Plot(chroms[i],ncbis[i], "./Population_Genomics/Top.delly.inversion.outliers.vcf.gz","SNPDI")
 }
-gp.plot.2.SNPDI.out<- gp.plot.2.SNPDI.out+
+gp.plot.1.SNPDI.out<- gp.plot.1.SNPDI.out+
 guides(fill = guide_legend(override.aes = list(size=6)),shape=guide_legend(override.aes = list(size=6, shape=c(23,21)) ))+ 
 guides(color=guide_legend(override.aes = list(size=6, shape=c(16,16,18,18,16,16,18,16,16,18,16,16,18))))
 ```
@@ -3781,15 +3867,16 @@ guides(color=guide_legend(override.aes = list(size=6, shape=c(16,16,18,18,16,16,
 png(filename=paste(prefix.OF,"Figure.4.Large.FST.Outlier.png", sep=""), type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 
 layout <-" 
-AAAAAAAAAAAAA
-BBBCCCDDEEEEF
-BBBCCCDDEEEEF
-BBBCCCDDEEEEF
-BBBCCCDDEEEEF
-BBBCCCDDEEEEF
+AAAAAAAAAAAAAAAAAAAAAAAA
+BBCCDDDEEEFFFGHHHHHIIJJK
+BBCCDDDEEEFFFGHHHHHIIJJK
+BBCCDDDEEEFFFGHHHHHIIJJK
+BBCCDDDEEEFFFGHHHHHIIJJK
+BBCCDDDEEEFFFGHHHHHIIJJK
 "
 
-fst.patch <- m2o.m + gp.plot.2.SNP.out  + (gp.plot.3.SNP.out + plot_layout(tag_level = "new")) +  (gp.plot.5.SNP.out+ plot_layout(tag_level = "new")) + (gp.plot.7.SNP.out+ plot_layout(tag_level = "new")) + (gp.plot.8.SNP.out+ plot_layout(tag_level = "new"))  + plot_layout(design=layout, guides="collect") 
+
+fst.patch <- m2o.m + gp.plot.1.SNP.out + (gp.plot.2.SNP.out + plot_layout(tag_level = "new")) + (gp.plot.3.SNP.out + plot_layout(tag_level = "new")) + (gp.plot.4.SNP.out+ plot_layout(tag_level = "new")) + (gp.plot.5.SNP.out+ plot_layout(tag_level = "new")) + (gp.plot.6.SNP.out+ plot_layout(tag_level = "new")) + (gp.plot.7.SNP.out+ plot_layout(tag_level = "new")) + (gp.plot.8.SNP.out+ plot_layout(tag_level = "new"))  + (gp.plot.9.SNP.out+ plot_layout(tag_level = "new"))  + (gp.plot.10.SNP.out+ plot_layout(tag_level = "new")) +plot_layout(design=layout, guides="collect") 
 
 #fst.patch & theme(plot.title = element_text(margin=margin(0,0,-10,0)))
 
@@ -3803,18 +3890,18 @@ filename <- paste(prefix.OFS,"Figure.S11.Large.FST.DI.Outlier.png", sep="")
 png(filename=filename, type="cairo",units="px", width=5600, height=3000, res=300, bg="transparent")
 
 layout <-" 
-AAAAAAAAAAAAAAAAAAAAAA
-BBCCCCCCCCDDDEEEEFFFFG
-BBCCCCCCCCDDDEEEEFFFFG
-BBCCCCCCCCDDDEEEEFFFFG
-BBCCCCCCCCDDDEEEEFFFFG
-BBCCCCCCCCDDDEEEEFFFFG
+AAAAAAAAAAAAAAAAAAAA
+BBCCCDDDDDEEFFFGGHII
+BBCCCDDDDDEEFFFGGHII
+BBCCCDDDDDEEFFFGGHII
+BBCCCDDDDDEEFFFGGHII
+BBCCCDDDDDEEFFFGGHII
 "
 
 
 
 #m2oDI.m / (gp.plot.2.SNPDI.out | gp.plot.3.SNPDI.out |  gp.plot.4.SNPDI.out |  gp.plot.5.SNPDI.out | gp.plot.7.SNPDI.out | gp.plot.8.SNPDI.out ) + plot_layout(design=layout, guides="collect")
-m2oDI.m + gp.plot.2.SNPDI.out  + (gp.plot.3.SNPDI.out + plot_layout(tag_level = "new")) +  (gp.plot.4.SNPDI.out+ plot_layout(tag_level = "new")) +  (gp.plot.5.SNPDI.out+ plot_layout(tag_level = "new")) + (gp.plot.7.SNPDI.out+ plot_layout(tag_level = "new")) + (gp.plot.8.SNPDI.out+ plot_layout(tag_level = "new")) + plot_layout(design=layout, guides="collect") + plot_annotation(tag_levels = 'A') 
+m2oDI.m + gp.plot.1.SNPDI.out  + (gp.plot.2.SNPDI.out + plot_layout(tag_level = "new")) + (gp.plot.3.SNPDI.out + plot_layout(tag_level = "new")) +  (gp.plot.4.SNPDI.out+ plot_layout(tag_level = "new")) +  (gp.plot.5.SNPDI.out+ plot_layout(tag_level = "new")) + (gp.plot.7.SNPDI.out+ plot_layout(tag_level = "new")) + (gp.plot.8.SNPDI.out+ plot_layout(tag_level = "new")) + (gp.plot.9.SNPDI.out+ plot_layout(tag_level = "new"))+ plot_layout(design=layout, guides="collect") + plot_annotation(tag_levels = 'A') 
 dev.off()
 ```
 
@@ -4227,89 +4314,193 @@ cp ./Population_Genomics/masked.wildae.OF_fst.10kb.bed ./Population_Genomics/mas
 ```
 
 ```{r}
+##fst <- read.table("./Population_Genomics/masked.wildae.OF_fst.10kb.bed.txt", header=TRUE)
+#
+#
+#fst <- fst %>% dplyr::mutate(fst50 = zoo::rollmean(WEIGHTED_FST, k = 5,fill = c(0,0,0)), fst100 = #zoo::rollmean(WEIGHTED_FST, k = 10,fill = c(0,0,0)))
+#
+#SNP <-c(1:(nrow(fst)))
+#mydf<-data.frame(SNP,fst)
+#mydf$CHR <- mydf$CHROM
+#mydf %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035780.1", "1")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035781.1", "2")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035782.1", "3")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035783.1", "4")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035784.1", "5")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035785.1", "6")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035786.1", "7")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035787.1", "8")) %>%
+#  mutate(CHR = str_replace(CHR, "NC_035788.1", "9")) %>% 
+#  mutate(CHR = str_replace(CHR, "NC_035789.1", "10"))  -> mydf
+#
+#mydf$CHR <- as.numeric(mydf$CHR)  
+#
+#md4.fst <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="WEIGHTED_FST",snp="SNP",logTransform=FALSE,sigLine=NA, #relative.positions = TRUE)
+#
+#dfm <- md4.fst[[1]]
+#
+#top95.dfm <- dfm[which(dfm$WEIGHTED_FST > quantile(dfm$WEIGHTED_FST,0.95)) ,]
+#
+#summary(top95.dfm)
 
-fst <- read.table("./Population_Genomics/masked.wildae.OF_fst.10kb.bed.txt", header=TRUE)
+#write(paste(top95.dfm$CHROM, top95.dfm$BIN_START,top95.dfm$BIN_END,top95.dfm$WEIGHTED_FST, sep='\t'),
+#      "./Population_Genomics/top95.wildAE.FST.bed")
+```
+
+####TEST
+
+```{bash}
+bedtools intersect -wb -a ./Population_Genomics/top95.wildAE.FST.bed -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'|
+sort | uniq > Sig.Loci.test.LOC
+
+bedtools intersect -wb -a <(grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.bed) -b <(mawk -v "x=$CUTOFFP" '$4 > x' ./Population_Genomics/masked.OF_fst.10kb.bed) > ./Population_Genomics/Masked_NoInbred_FST_Outflank.95.bed
+
+bedtools intersect -wb -a <(grep TRUE ./Population_Genomics/Masked_NoInbred_FST_Outflank.95.bed | bedtools slop -b 100 -g ./other_files/genome.file -i -) -b /home/Genomic_Resources/C_virginica/bed_and_GFF/sorted.ref3.0.gene.bed | grep -oh "Name=LOC[0-9]*;" | sed 's/Name=//g' | sed 's/;//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.test1.LOC
 
 
-fst <- fst %>% dplyr::mutate(fst50 = zoo::rollmean(WEIGHTED_FST, k = 5,fill = c(0,0,0)), fst100 = zoo::rollmean(WEIGHTED_FST, k = 10,fill = c(0,0,0)))
 
-SNP <-c(1:(nrow(fst)))
-mydf<-data.frame(SNP,fst)
-mydf$CHR <- mydf$CHROM
-mydf %>% 
-  mutate(CHR = str_replace(CHR, "NC_035780.1", "1")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035781.1", "2")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035782.1", "3")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035783.1", "4")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035784.1", "5")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035785.1", "6")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035786.1", "7")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035787.1", "8")) %>%
-  mutate(CHR = str_replace(CHR, "NC_035788.1", "9")) %>% 
-  mutate(CHR = str_replace(CHR, "NC_035789.1", "10"))  -> mydf
 
-mydf$CHR <- as.numeric(mydf$CHR)  
+bedtools intersect -wb -a ./Population_Genomics/Output/structural_variants/Detected_large_inversions.bed -b -b /home/Genomic_Resources/C_virginica/bed_and_GFF/sorted.ref3.0.gene.bed | grep -oh "Name=LOC[0-9]*;" | sed 's/Name=//g' | sed 's/;//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.test2.LOC
 
-md4.fst <-ggman(mydf,chrom="CHR",bp="BIN_START",pvalue="WEIGHTED_FST",snp="SNP",logTransform=FALSE,sigLine=NA, relative.positions = TRUE)
 
-dfm <- md4.fst[[1]]
 
-top95.dfm <- dfm[which(dfm$WEIGHTED_FST > quantile(dfm$WEIGHTED_FST,0.95)) ,]
+bedtools intersect -wb -a <(grep NC_035780.1 ./Population_Genomics/Output/structural_variants/Detected_large_inversions.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.inv.chr1.LOC
 
-summary(top95.dfm)
+bedtools intersect -wb -a <(echo -e "NC_035784.1\t61560000\t64030000") -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.inv.chr5.LOC
 
-write(paste(top95.dfm$CHROM, top95.dfm$BIN_START,top95.dfm$BIN_END,top95.dfm$WEIGHTED_FST, sep='\t'),
-      "./Population_Genomics/top95.wildAE.FST.bed")
+bedtools intersect -wb -a <(echo -e "NC_035784.1\t64030000\t80150000\nNC_035785.1\t29630000\t44000000") -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.inv.chr6.LOC
+
+
+./Population_Genomics/95%.outlier.SNPs.no_inversion.bed
+./Population_Genomics/95%.outlier.SNPs.delly.inversion.bed
+./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed
+
+
+bedtools intersect -wb -a <(bedtools slop -b 10000 -g ./other_files/genome.file -i ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.outall.LI.LOC
+
+bedtools intersect -wb -a ./Population_Genomics/Intermediate_Files/inversion.fst.large_inversion.outliers.bed -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.outall.LI.LOC
+
+
+
+bedtools intersect -wb -a ./Population_Genomics/95%.outlier.SNPs.no_inversion.bed -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.outall.NOI.LOC
+
+bedtools intersect -wb -a <(bedtools slop -b 10000 -g ./other_files/genome.file -i ./Population_Genomics/95%.outlier.SNPs.no_inversion.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.outall.NOI.LOC
+
+bedtools intersect -wb -a <(bedtools slop -b 10000 -g ./other_files/genome.file -i ./Population_Genomics/95%.outlier.SNPs.delly.inversion.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.outall.DI.LOC
+
+
+bedtools intersect -wb -a ./Population_Genomics/95%.outlier.SNPs.no_inversion.bed -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.outall.NOI.LOC
+
+
+bedtools intersect -wb -a ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.WAEoutall.NOI.LOC
+
+bedtools intersect -wb -a <(bedtools slop -b 10000 -g ./other_files/genome.file -i ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.WAEoutall.LI.LOC
+
+bedtools intersect -wb -a <(bedtools slop -b 10000 -g ./other_files/genome.file -i ./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.WAEoutall.NOI.LOC
+
+bedtools intersect -wb -a <(bedtools slop -b 10000 -g ./other_files/genome.file -i ./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed) -b ~/CASE/analysis/sorted.ref3.0.CDS.bed | grep -oh "gene=LOC.*;product" | sed 's/gene=//g' | sed 's/;product//g' | sed 's/;partial=true//g'| sort | uniq > Sig.Loci.WAEoutall.DI.LOC
+
+```
+
+```{r}
+library(gprofiler2)
+set_base_url("http://biit.cs.ut.ee/gprofiler_beta")
+
+gostres <- gost(query = list("TEST" = read.table("Sig.Loci.test.LOC",header=FALSE)), organism = "cvgca002022765v4", multi_query = FALSE,user_threshold = 0.1,domain_scope = "known")
+
+p <-gostplot(gostres, capped = TRUE, interactive = FALSE)
+
+#p <- p+ theme_black() + theme(legend.position = "none")
+
+pp <- publish_gostplot(p, width = NA, height = NA, filename = NULL )
+
+png(filename="TestGO.png", type="cairo",units="px", width=4000, height=2500, res=300, bg="transparent")
+
+pp 
+dev.off()
 ```
 
 
+
+
+
 ```{bash}
-bedtools intersect -a ./Population_Genomics/top95.wildAE.FST.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed  > ./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.bed
+#bedtools intersect -a ./Population_Genomics/top95.wildAE.FST.bed -b #./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed  > #./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.bed
+#
+#bedtools subtract -a ./Population_Genomics/top95.wildAE.FST.bed -b #./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools subtract -a - -b #./Population_Genomics/sv.full.bed > ./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.bed
+#
+#bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b #./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.bed | grep TRUE > #./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed
+#
+#
+#bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b #./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.bed | grep TRUE > #./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed
+#
+#bedtools subtract -a ./Population_Genomics/top95.wildAE.FST.bed -b #./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools intersect -a - -b #./Population_Genomics/delly.merged.inversions.masked.bed > #./Population_Genomics/95%.outlier.SNPs.wildae.10kb.small_inversions.bed
+#
+#bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b #./Population_Genomics/95%.outlier.SNPs.wildae.10kb.small_inversions.bed | grep TRUE > #./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed
+#
+#
+#bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed #./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o #./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz
+#
+#bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed #./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o #./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz
+#
+#bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed #./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o #./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz
+#
+#bcftools index ./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz
+#bcftools index ./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz
+#bcftools index ./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz
+#
+#bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b #./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c #4,5 -o first| cut -f1-4,6 > ./Population_Genomics/95%.10kb.WILDAE.OF.FST.large_inversions.bed
+#
+#bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b #./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c #4,5 -o first| cut -f1-4,6 > ./Population_Genomics/95%.10kb.WILDAE.OF.FST.no_inversions.bed
+#
+#bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b #./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c #4,5 -o first| cut -f1-4,6 > ./Population_Genomics/95%.10kb.WILDAE.OF.FST.small_inversions.bed
+#
+#cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95")  <(mawk '{print $0 "\tTRUE"}' #./Population_Genomics/95%.10kb.WILDAE.OF.FST.small_inversions.bed) > #./Population_Genomics/95%.outlier.wildae.10kb.small_inversions.txt
+#cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95NI")  <(mawk '{print $0 "\tTRUE"}' #./Population_Genomics/95%.10kb.WILDAE.OF.FST.no_inversions.bed) > #./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.txt
+#cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95NLI")  <(mawk '{print $0 "\tTRUE"}' #./Population_Genomics/95%.10kb.WILDAE.OF.FST.large_inversions.bed) > #./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.txt
+#
+#
+#cp ./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz #./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz #./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz  #./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed #./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed #./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed #./Population_Genomics/Output/Outliers/Wild_Atlantic
+```
 
-bedtools subtract -a ./Population_Genomics/top95.wildAE.FST.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools subtract -a - -b ./Population_Genomics/sv.full.bed > ./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.bed
+```{bash}
+bedtools subtract -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools subtract -a - -b ./Population_Genomics/sv.full.bed > ./Population_Genomics/Outlier.SNPs.wildae.no_inversions.bed
 
-bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b ./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.bed | grep TRUE > ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed
+bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed  > ./Population_Genomics/Outlier.SNPs.wildae.large_inversions.bed
 
+bedtools subtract -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools intersect -a - -b ./Population_Genomics/delly.merged.inversions.masked.bed > ./Population_Genomics/Outlier.SNPs.wildae.small_inversions.bed
 
-bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b ./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.bed | grep TRUE > ./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed
+bcftools view --threads 40 -R ./Population_Genomics/Outlier.SNPs.wildae.large_inversions.bed ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz
 
-bedtools subtract -a ./Population_Genomics/top95.wildAE.FST.bed -b ./Population_Genomics/Intermediate_Files/Detected_large_inversions.bed | bedtools intersect -a - -b ./Population_Genomics/delly.merged.inversions.masked.bed > ./Population_Genomics/95%.outlier.SNPs.wildae.10kb.small_inversions.bed
+bcftools view --threads 40 -R ./Population_Genomics/Outlier.SNPs.wildae.no_inversions.bed ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz
 
-bedtools intersect -a <( grep TRUE ./Population_Genomics/Masked_WildAE_FST_Outflank.bed) -b ./Population_Genomics/95%.outlier.SNPs.wildae.10kb.small_inversions.bed | grep TRUE > ./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed
-
-
-bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz
-
-bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz
-
-bcftools view --threads 40 -R ./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz
+bcftools view --threads 40 -R ./Population_Genomics/Outlier.SNPs.wildae.small_inversions.bed ./Population_Genomics/SNP.MASKED.wildAE.g1.maf05.max2alleles.FIL.vcf.gz -O z -o ./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz
 
 bcftools index ./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz
 bcftools index ./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz
 bcftools index ./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz
 
-bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c 4,5 -o first| cut -f1-4,6 > ./Population_Genomics/95%.10kb.WILDAE.OF.FST.large_inversions.bed
+bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b ./Population_Genomics/Outlier.SNPs.wildae.large_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c 4,5 -o first| cut -f1-4,6 > ./Population_Genomics/10kb.WILDAE.OF.FST.large_inversions.bed
 
-bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b ./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c 4,5 -o first| cut -f1-4,6 > ./Population_Genomics/95%.10kb.WILDAE.OF.FST.no_inversions.bed
+bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b ./Population_Genomics/Outlier.SNPs.wildae.no_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c 4,5 -o first| cut -f1-4,6 > ./Population_Genomics/10kb.WILDAE.OF.FST.no_inversions.bed
 
-bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b ./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c 4,5 -o first| cut -f1-4,6 > ./Population_Genomics/95%.10kb.WILDAE.OF.FST.small_inversions.bed
+bedtools intersect -a ./Population_Genomics/masked.wildae.OF_fst.10kb.bed -b ./Population_Genomics/Outlier.SNPs.wildae.small_inversions.bed -wa | grep TRUE |bedtools merge -i - -d -1 -c 4,5 -o first| cut -f1-4,6 > ./Population_Genomics/10kb.WILDAE.OF.FST.small_inversions.bed
 
-cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/95%.10kb.WILDAE.OF.FST.small_inversions.bed) > ./Population_Genomics/95%.outlier.wildae.10kb.small_inversions.txt
-cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95NI")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/95%.10kb.WILDAE.OF.FST.no_inversions.bed) > ./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.txt
-cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95NLI")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/95%.10kb.WILDAE.OF.FST.large_inversions.bed) > ./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/10kb.WILDAE.OF.FST.small_inversions.bed) > ./Population_Genomics/Outlier.wildae.10kb.small_inversions.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95NI")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/10kb.WILDAE.OF.FST.no_inversions.bed) > ./Population_Genomics/Outlier.wildae.10kb.no_inversions.txt
+cat <(echo -e "CHROM\tBIN_START\tBIN_END\tWEIGHTED_FST\t95NLI")  <(mawk '{print $0 "\tTRUE"}' ./Population_Genomics/10kb.WILDAE.OF.FST.large_inversions.bed) > ./Population_Genomics/Outlier.wildae.10kb.large_inversions.txt
 
 
 cp ./Population_Genomics/Top.wildae.outliers.small_inversions.vcf.gz ./Population_Genomics/Top.wildae.outliers.no_inversions.vcf.gz ./Population_Genomics/Top.wildae.outliers.large_inversions.vcf.gz  ./Population_Genomics/95%.outlier.SNPs.wildae.large_inversions.bed ./Population_Genomics/95%.outlier.SNPs.wildae.no_inversions.bed ./Population_Genomics/95%.outlier.SNPs.wildae.small_inversions.bed ./Population_Genomics/Output/Outliers/Wild_Atlantic
 ```
 
-
-
 ```{r}
 
 fst<-read.table("./Population_Genomics/masked.wildae.OF_fst.10kb.bed.txt", header=TRUE)
-Ffst <- read.table("./Population_Genomics/95%.outlier.wildae.10kb.small_inversions.txt", header=TRUE)
-FfstNI <- read.table("./Population_Genomics/95%.outlier.wildae.10kb.no_inversions.txt", header=TRUE)
-FfstNLI <- read.table("./Population_Genomics/95%.outlier.wildae.10kb.large_inversions.txt", header=TRUE)
+Ffst <- read.table("./Population_Genomics/Outlier.wildae.10kb.small_inversions.txt", header=TRUE)
+FfstNI <- read.table("./Population_Genomics/Outlier.wildae.10kb.no_inversions.txt", header=TRUE)
+FfstNLI <- read.table("./Population_Genomics/Outlier.wildae.10kb.large_inversions.txt", header=TRUE)
 
 big.fst <- join(fst,Ffst, by =c("CHROM", "BIN_START"),type="full")
 big.fst <- join(big.fst,FfstNI, by =c("CHROM", "BIN_START"),type="full")
@@ -4376,7 +4567,7 @@ m2.m2 <- ggplot(dfm.plot2, aes(x= index, y=WEIGHTED_FST, colour = as.factor(chro
   theme_classic() +
   labs(y="*F<sub>ST</sub>*") +theme(axis.title.y = element_markdown(),plot.title = element_markdown(), axis.title.x = element_blank())+ 
   scale_color_manual(values=c("#5e5e5e","#242424"))+
-  scale_fill_manual(values=col_pal[c(1,2,3,4,5,9)])
+  scale_fill_manual(values=col_pal[c(1,2,3,4,5,8,9)])
 
 m2o.m2 <-m2.m2+geom_point(data=dfm.sub2,alpha=0.8,size=3.0,shape=24, stroke = 0.01, color="black", aes( fill = as.factor(CHR)))
 
@@ -4389,7 +4580,7 @@ m2.m3 <- ggplot(dfm.plot3, aes(x= index, y=WEIGHTED_FST, colour = as.factor(chro
   theme_classic() +
   labs(y="*F<sub>ST</sub>*") +theme(axis.title.y = element_markdown(),plot.title = element_markdown(), axis.title.x = element_blank())+ 
   scale_color_manual(values=c("#5e5e5e","#242424"))+
-  scale_fill_manual(values=col_pal[c(1,2,3,4,5,7,9)])
+  scale_fill_manual(values=col_pal[c(1,2,3,4,5,6,7,8,9,10)])
 
 
 m2o.m3 <-m2.m3+geom_point(data=dfm.sub3,alpha=0.8,size=3.0,shape=23, stroke = 0.01, color="black", aes( fill = as.factor(CHR)))
@@ -4405,7 +4596,7 @@ m2.m3 <- ggplot(dfm.plot3, aes(x= index, y=WEIGHTED_FST, colour = as.factor(chro
   theme_classic() +
   labs(y="*F<sub>ST</sub>*") +theme(axis.title.y = element_markdown(),plot.title = element_markdown(), axis.title.x = element_blank())+ 
   scale_color_manual(values=c("#5e5e5e","#242424"))+
-  scale_fill_manual(values=col_pal[c(1,2,3,4,5,6,7,9)])
+  scale_fill_manual(values=col_pal[c(1,2,3,4,5,6,7,8,9,10)])
   #scale_fill_manual(values=c(pal[1],pal[2]))
 
 m2o.mALL <- m2.m3+geom_point(data=dfm.sub3,alpha=0.8,size=3.0,shape=23, stroke = 0.1, color="black", aes( fill = as.factor(CHR))) + geom_point(data=dfm.sub1,alpha=0.8,size=3.0,shape=25, stroke = 0.1, color="black", aes( fill = as.factor(CHR))) + geom_point(data=dfm.sub2,alpha=0.8,size=3.0,shape=24, stroke = 0.1, color="black", aes( fill = as.factor(CHR)))
@@ -4601,14 +4792,18 @@ Chrom_Outlier_GP_Plot(chroms[2],ncbis[2], vcf2, "vcf2")
 Chrom_Outlier_GP_Plot(chroms[3],ncbis[3], vcf2, "vcf2")
 Chrom_Outlier_GP_Plot(chroms[4],ncbis[4], vcf2, "vcf2")
 Chrom_Outlier_GP_Plot(chroms[5],ncbis[5], vcf2, "vcf2")
+Chrom_Outlier_GP_Plot(chroms[8],ncbis[8], vcf2, "vcf2")
 Chrom_Outlier_GP_Plot(chroms[9],ncbis[9], vcf2, "vcf2")
 Chrom_Outlier_GP_Plot_legend(chroms[1],ncbis[1], vcf3, "vcf3")
 Chrom_Outlier_GP_Plot(chroms[2],ncbis[2], vcf3, "vcf3")
 Chrom_Outlier_GP_Plot(chroms[3],ncbis[3], vcf3, "vcf3")
 Chrom_Outlier_GP_Plot(chroms[4],ncbis[4], vcf3, "vcf3")
 Chrom_Outlier_GP_Plot(chroms[5],ncbis[5], vcf3, "vcf3")
+# Chrom_Outlier_GP_Plot(chroms[6],ncbis[6], vcf3, "vcf3")
 Chrom_Outlier_GP_Plot(chroms[7],ncbis[7], vcf3, "vcf3")
+Chrom_Outlier_GP_Plot(chroms[8],ncbis[8], vcf3, "vcf3")
 Chrom_Outlier_GP_Plot(chroms[9],ncbis[9], vcf3, "vcf3")
+#Chrom_Outlier_GP_Plot(chroms[10],ncbis[10], vcf3, "vcf3")
 ```
 
 ```{r}
@@ -4617,7 +4812,7 @@ layout <- "
 #AAABBBGG
 CCCCCCCCC
 DDDEEEFFF
-DDDEEEFFF
+DDDEEEFFF 
 "
 
 png(filename=paste(prefix.OF,"Figure.5.WildAe.FST.outliers.across.architecture.png", sep=""), type="cairo",units="px", width=6220, height=3500, res=300, bg="transparent")
@@ -4657,7 +4852,7 @@ png(filename=paste(prefix.OFS,"Figure.S14.WildAe.FST.Large_inversions.outliers.p
 plot_fin_2 <-m2o.m2 +  pca.out.plot2 + gp.plot.1.vcf2.out + gp.plot.2.vcf2.out + gp.plot.3.vcf2.out + gp.plot.4.vcf2.out + gp.plot.5.vcf2.out + gp.plot.9.vcf2.out + pca_wildAE_12pp + guide_area() +  plot_layout(design=layout, guides = "collect") + plot_annotation(tag_levels = 'A') + theme(legend.text =element_text(size=10)) 
   
 
-plot_sub <- (gp.plot.1.vcf2.out | gp.plot.2.vcf2.out | gp.plot.3.vcf2.out | gp.plot.4.vcf2.out | gp.plot.5.vcf2.out | gp.plot.9.vcf2.out)/guide_area() + plot_layout(tag_level = 'keep',guides = "collect", heights = c(50, 1)) 
+plot_sub <- (gp.plot.1.vcf2.out | gp.plot.2.vcf2.out | gp.plot.3.vcf2.out | gp.plot.4.vcf2.out | gp.plot.5.vcf2.out | gp.plot.8.vcf2.out | gp.plot.9.vcf2.out)/guide_area() + plot_layout(tag_level = 'keep',guides = "collect", heights = c(50, 1)) 
 
    layout <-"
     AAAAAAAAAA
@@ -4674,7 +4869,7 @@ png(filename=paste(prefix.OFS,"Figure.S13.WildAe.FST.small_inversions_outliers.p
       plot_fin_2
       dev.off()  
 
-plot_sub <- (gp.plot.1.vcf3.out | gp.plot.2.vcf3.out | gp.plot.3.vcf3.out | gp.plot.4.vcf3.out | gp.plot.5.vcf3.out | gp.plot.7.vcf3.out | gp.plot.9.vcf3.out )/guide_area() + plot_layout(tag_level = 'keep',guides = "collect", heights = unit(c(500, 0.25), c('null', 'cm'))) 
+plot_sub <- (gp.plot.1.vcf3.out | gp.plot.2.vcf3.out | gp.plot.3.vcf3.out | gp.plot.4.vcf3.out | gp.plot.5.vcf3.out | gp.plot.7.vcf3.out | gp.plot.8.vcf3.out | gp.plot.9.vcf3.out )/guide_area() + plot_layout(tag_level = 'keep',guides = "collect", heights = unit(c(500, 0.25), c('null', 'cm'))) 
 
 
 
